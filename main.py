@@ -11,11 +11,16 @@ def fetch_earthquakes():
         'minlongitude':60,
         'maxlongitude':78,
         'orderby':'time',
-        'limit':200
+        'limit':300
     }
 
-    response=requests.get(URL,params=params)
-    return response.json()
+    try: 
+        response=requests.get(URL,params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except response.requests.exception.RequestException as error:
+        print('Could not Fetch Data')
+        return None
 
 if __name__ == '__main__':
     data=fetch_earthquakes()
@@ -42,6 +47,8 @@ def filter_pakistan(quakes):
 
 if __name__ == "__main__":
     data = fetch_earthquakes()
+    if data is None:
+        raise SystemExit(1)
     quakes = parse_earthquakes(data)
     quakes = filter_pakistan(quakes)
     quakes.sort(key=lambda q: q["magnitude"], reverse=True)
